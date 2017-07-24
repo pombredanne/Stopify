@@ -74,6 +74,11 @@ const visitor: Visitor = {
         "const"));
     path.node.body.unshift(
       letExpression(
+        t.identifier("suspendCC"),
+        t.memberExpression(t.identifier("$__R"), t.identifier("suspendCC")),
+        "const"));
+    path.node.body.unshift(
+      letExpression(
         t.identifier("$__R"),
         t.callExpression(
           t.identifier("require"),
