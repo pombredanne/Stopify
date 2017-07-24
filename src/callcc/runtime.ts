@@ -76,7 +76,11 @@ export function restore(aStack: KFrame[]): any {
 
 export function suspendCC(f: (k: any) => any): any {
   return callCC(function(k) {
-    throw new Discard(() => f(k));
+    throw new Discard(() =>
+      f(function(x: any) {
+        setTimeout(() => runtime(() => k(x)), 0);
+      })
+  )
   });
 }
 
