@@ -33,9 +33,7 @@ const reserved = [
 ];
 
 function appCallCC(receiver: t.Expression) {
-  return t.callExpression(
-    t.memberExpression(t.identifier("$__R"), t.identifier("callCC")),
-    [receiver]);
+  return t.callExpression(t.identifier("callCC"), [receiver]);
 }
 
 function handleBlock(body: t.BlockStatement) {
