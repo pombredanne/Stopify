@@ -73,6 +73,11 @@ export function getRTS(): Runtime {
   }
 }
 
+export function getOrMakeRTS(opts: Opts): Runtime {
+  if (rts === undefined) return makeRTS(opts)
+  else return rts
+}
+
 function getOpts(): Opts {
   const opts = JSON.parse(
     decodeURIComponent(window.location.hash.slice(1)));

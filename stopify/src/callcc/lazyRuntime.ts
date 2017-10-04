@@ -25,7 +25,7 @@ export class LazyRuntime extends common.Runtime {
 
   runtime(body: () => any): any {
     try {
-      body();
+      return body();
       assert(this.mode, 'executing completed in restore mode');
     }
     catch (exn) {

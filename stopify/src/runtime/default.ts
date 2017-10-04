@@ -3,7 +3,7 @@ import { Opts, Stoppable, ElapsedTimeEstimatorName } from '../types';
 import * as minimist from 'minimist';
 import { sum } from '../generic';
 import { sprintf } from 'sprintf';
-import { makeRTS, getRTS } from '../rts';
+import { makeRTS, getRTS, getOrMakeRTS } from '../rts';
 import * as path from 'path';
 
 const fakeRTS = {
@@ -49,8 +49,8 @@ export class Default {
     rts.resumeFromCaptured();
   }
 
-  run(M: (() => void) | undefined, opts: Opts, done: () => void): void {
-    const rts = opts.transform === 'original' ? fakeRTS : makeRTS(opts);
+  run(M: (() => any) | undefined, opts: Opts, done: (res: any) => void): void {
+    const rts = opts.transform === 'original' ? fakeRTS : getOrMakeRTS(opts);
     let lastStopTime: number | undefined;
     let stopIntervals: number[] = [];
 
@@ -66,7 +66,7 @@ export class Default {
       return !this.mustStop;
     }
 
-    const onDone = () => {
+    const onDone = (res: any) => {
       const endTime = Date.now();
       const runningTime = endTime - startTime;
       const latencyAvg = runningTime / this.yields;
@@ -91,7 +91,7 @@ export class Default {
         latencyVar = 'NA';
       }
       console.log(`${runningTime},${this.yields},${sprintf("%.2f", latencyAvg)},${latencyVar}`);
-      done();
+      done(res);
     }
 
     if (opts.env !== 'node') {
@@ -112,18 +112,13 @@ export class Default {
     const startTime = Date.now();
 
     if (typeof opts.stop !== 'undefined') {
-      setTimeout(() => this.stop(() => onDone()), opts.stop * 1000);
+      setTimeout(() => this.stop(() => onDone(res)), opts.stop * 1000);
     }
 
-    if (M) {
-      M();
-    }
-    else {
-      // This causes a "critical dependency" warning in Webpack. However, it is
-      // never evaluated on the browser.
+    let res = M ? M() :
       require(path.relative(__dirname, path.resolve(opts.filename)));
-    }
-    rts.delimit(onDone);
+
+    rts.delimit(() => onDone(res));
   }
 }
 
